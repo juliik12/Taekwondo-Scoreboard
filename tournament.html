@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Llaves del Torneo</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap');
+:root{--bg:#090d12;--panel:#121a24;--panel2:#0d141d;--border:#1d2b3b;--text:#e8edf2;--gold:#ffd700}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Rajdhani',sans-serif;background:radial-gradient(circle at 20% 0%,#101c2b,#090d12);color:var(--text);padding:20px;min-height:100vh}
+.wrap{max-width:1180px;margin:0 auto}
+h1{font-family:'Bebas Neue',sans-serif;letter-spacing:.18em;font-size:2.4rem;margin-bottom:10px} h1 span{color:var(--gold)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+a{color:#b9d9ff;text-decoration:none}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.col{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px}
+.col h2{font-family:'Bebas Neue',sans-serif;letter-spacing:.12em;margin-bottom:10px}
+.list{display:flex;flex-direction:column;gap:9px}
+.item{background:var(--panel2);border:1px solid var(--border);border-radius:9px;padding:10px}
+.item b{color:var(--gold)}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+@media(max-width:560px){body{padding:12px}h1{font-size:1.9rem}.col{padding:10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1><span>LLAVES</span> DEL TORNEO</h1>
+    <a href="/">Volver al Centro</a>
+  </div>
+
+  <div class="grid">
+    <section class="col">
+      <h2>Cuartos de Final</h2>
+      <div id="qf" class="list"></div>
+    </section>
+
+    <section class="col">
+      <h2>Semifinal</h2>
+      <div id="sf" class="list"></div>
+    </section>
+
+    <section class="col">
+      <h2>Final</h2>
+      <div id="ff" class="list"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+function renderList(id, items){
+  const el = document.getElementById(id);
+  if(!items || !items.length){
+    el.innerHTML = '<div class="item">Sin datos aún.</div>';
+    return;
+  }
+
+  el.innerHTML = items.map((m)=>
+    `<div class="item"><b>${m.room}</b><br>${m.redName} ${m.redScore} - ${m.blueScore} ${m.blueName}<br>Ganador: ${m.winner}</div>`
+  ).join('');
+}
+
+async function loadBracket(){
+  const res = await fetch('/bracket_data');
+  if(!res.ok) return;
+  const data = await res.json();
+  renderList('qf', data.quarterfinal);
+  renderList('sf', data.semifinal);
+  renderList('ff', data.final);
+}
+
+loadBracket();
+setInterval(loadBracket, 3000);
+</script>
+</body>
+</html>
+

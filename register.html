@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registrar Usuario</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap');
+:root{--bg:#090d12;--panel:#121a24;--border:#1d2b3b;--text:#e8edf2;--dim:#7a8da1;--gold:#ffd700}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Rajdhani',sans-serif;background:radial-gradient(circle at 20% 0%,#101c2b,#090d12);color:var(--text);display:grid;place-items:center;min-height:100vh;padding:16px}
+.card{width:min(460px,100%);background:var(--panel);border:1px solid var(--border);padding:24px;border-radius:12px}
+h1{font-family:'Bebas Neue',sans-serif;letter-spacing:.18em;font-size:2.2rem;margin-bottom:10px}
+h1 span{color:var(--gold)}
+label{display:block;margin:12px 0 6px;color:var(--dim);font-weight:700}
+input,select{width:100%;padding:11px;border:1px solid var(--border);border-radius:8px;background:#0c131c;color:var(--text)}
+button{margin-top:16px;width:100%;padding:12px;border:none;border-radius:8px;background:var(--gold);color:#000;font-weight:800;cursor:pointer}
+.msg{margin-top:12px;color:#9ef5b7;min-height:20px}
+.err{color:#ff9e9e}
+a{display:inline-block;margin-top:12px;color:#b8d7ff;text-decoration:none}
+@media(max-width:560px){.card{padding:16px}h1{font-size:1.8rem}}
+</style>
+</head>
+<body>
+  <form class="card" onsubmit="registerUser(event)">
+    <h1>ALTA <span>USUARIO</span></h1>
+
+    <label>Usuario</label>
+    <input id="username" required minlength="3">
+
+    <label>Contraseña</label>
+    <input id="password" type="password" required minlength="8">
+
+    <label>Rol</label>
+    <select id="role">
+      <option value="professor">Profesor</option>
+      <option value="admin">Administrador</option>
+    </select>
+
+    <button type="submit">Registrar</button>
+    <div class="msg" id="msg"></div>
+    <a href="/">Volver al centro</a>
+  </form>
+
+<script>
+async function registerUser(e){
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const role = document.getElementById('role').value;
+
+  const res = await fetch('/register',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({username,password,role})
+  });
+
+  const msg = document.getElementById('msg');
+  msg.classList.remove('err');
+
+  if(!res.ok){
+    msg.textContent = 'No se pudo registrar (usuario existente, datos inválidos o contraseña corta).';
+    msg.classList.add('err');
+    return;
+  }
+
+  msg.textContent = 'Usuario registrado correctamente.';
+  document.getElementById('username').value='';
+  document.getElementById('password').value='';
+}
+</script>
+</body>
+</html>
+
+

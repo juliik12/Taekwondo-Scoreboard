@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TV Publica Ring</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+body.tv-mode .sb-header{padding:14px 20px}
+body.tv-mode .sb-logo{font-size:1.8rem}
+body.tv-mode .sb-main{min-height:calc(100vh - 130px);padding:0 10px 20px}
+body.tv-mode .competitor-name{font-size:3rem}
+body.tv-mode .score-display{font-size:clamp(10rem,26vw,22rem);padding:12px 24px}
+body.tv-mode .timer-display{font-size:clamp(5rem,10vw,9rem)}
+body.tv-mode .round-label{font-size:2rem}
+body.tv-mode .round-badge{font-size:1.6rem}
+</style>
+</head>
+<body class="scoreboard-wrapper tv-mode">
+<header class="sb-header">
+  <div class="sb-logo">PANTALLA PUBLICA · <span id="roomName">RING</span></div>
+</header>
+
+<section class="rounds-bar">
+  <div class="round-label" id="phaseLabel">LISTO</div>
+  <div class="round-label" id="roundLabel">ASALTO 1</div>
+</section>
+
+<main class="sb-main">
+  <section class="competitor red">
+    <div class="competitor-name" id="redName">ESQUINA ROJA</div>
+    <div class="score-display" id="redScore">0</div>
+    <div class="penalty-display">GAM-JEOM <span id="redPenalties">0</span></div>
+  </section>
+  <section class="center-col">
+    <div class="round-badge">EN VIVO</div>
+    <div class="timer-display" id="timer">2:00</div>
+    <div class="divider-line"></div>
+    <div class="round-label" id="matchState">LISTO</div>
+  </section>
+  <section class="competitor blue">
+    <div class="competitor-name" id="blueName">ESQUINA AZUL</div>
+    <div class="score-display" id="blueScore">0</div>
+    <div class="penalty-display">GAM-JEOM <span id="bluePenalties">0</span></div>
+  </section>
+</main>
+
+<script>
+window.SCOREBOARD_READ_ONLY = true;
+</script>
+<script src="/static/script.js"></script>
+<script>
+const phaseMap = {
+  idle: 'LISTO',
+  running: 'COMBATE',
+  paused: 'PAUSADO',
+  rest: 'DESCANSO',
+  round_end: 'FIN DEL ROUND',
+  match_end: 'FIN DEL COMBATE'
+};
+
+function onStateChange(s){
+  document.getElementById('roomName').textContent = (s.roomName || '').toUpperCase();
+  document.getElementById('redName').textContent = (s.redName || 'ESQUINA ROJA').toUpperCase();
+  document.getElementById('blueName').textContent = (s.blueName || 'ESQUINA AZUL').toUpperCase();
+  document.getElementById('redScore').textContent = s.redScore;
+  document.getElementById('blueScore').textContent = s.blueScore;
+  document.getElementById('redPenalties').textContent = s.redPenalties;
+  document.getElementById('bluePenalties').textContent = s.bluePenalties;
+  const timer = document.getElementById('timer');
+  timer.textContent = formatTime(s.timeLeft);
+  timer.classList.toggle('urgent', s.timeLeft <= 10);
+  document.getElementById('roundLabel').textContent = 'ASALTO ' + s.currentRound;
+  const phase = phaseMap[s.phase] || 'LISTO';
+  document.getElementById('phaseLabel').textContent = phase;
+  document.getElementById('matchState').textContent = phase;
+}
+</script>
+</body>
+</html>
+

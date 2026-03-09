@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Árbitro AZUL</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+<div class="panel-wrapper blue-panel">
+
+<div class="panel-header">
+<div class="panel-title">AZUL</div>
+<div class="panel-score-preview" id="blueScorePreview">0</div>
+<div class="panel-score-label">PUNTOS ACTUALES</div>
+</div>
+
+<div class="panel-divider"></div>
+
+<div class="score-buttons">
+
+<button class="score-btn add" onclick="handleScore(1)">
++1
+<span class="btn-label">PUÑO</span>
+</button>
+
+<button class="score-btn add" onclick="handleScore(2)">
++2
+<span class="btn-label">PETO</span>
+</button>
+
+<button class="score-btn add" onclick="handleScore(3)">
++3
+<span class="btn-label">CABEZA</span>
+</button>
+
+<button class="score-btn add" onclick="handleScore(4)">
++4
+<span class="btn-label">GIRO PETO</span>
+</button>
+<button class="score-btn add" onclick="handleScore(6)">
++6
+<span class="btn-label">GIRO CABEZA</span>
+</button>
+
+<button class="score-btn sub" onclick="handleScore(-1)">
+−1
+<span class="btn-label">RESTAR</span>
+</button>
+
+<button class="score-btn penalty" onclick="handlePenaltyBtn()">
+⚑ PENALIZACIÓN
+<span class="btn-label">+1 AZUL</span>
+</button>
+
+</div>
+
+<div class="panel-footer">
+<div class="panel-timer" id="panelTimer">2:00</div>
+<div class="panel-round-info" id="panelRoundInfo">Asalto 1 · Listo</div>
+</div>
+
+</div>
+
+<script src="/static/script.js"></script>
+
+<script>
+
+function handleScore(pts){
+addScore("blue",pts)
+flashFeedback(pts>0?"add":"sub")
+}
+
+function handlePenaltyBtn(){
+addPenalty("blue")
+flashFeedback("penalty")
+}
+
+function flashFeedback(type){
+
+const panel=document.querySelector(".panel-wrapper")
+
+panel.style.transition="none"
+
+if(type==="add") panel.style.filter="brightness(1.3)"
+else if(type==="sub") panel.style.filter="brightness(0.7)"
+else panel.style.filter="sepia(0.5) brightness(1.2)"
+
+setTimeout(()=>{
+panel.style.transition="filter .3s"
+panel.style.filter=""
+},80)
+
+}
+
+function renderPanel(s){
+
+document.getElementById("blueScorePreview").textContent=s.blueScore
+document.getElementById("panelTimer").textContent=formatTime(s.timeLeft)
+
+const phaseMap={
+idle:"Listo",
+running:"Combate",
+paused:"Pausado",
+rest:"Descanso",
+round_end:"Fin del round",
+match_end:"Fin del combate"
+}
+
+document.getElementById("panelRoundInfo").textContent=
+"Asalto "+s.currentRound+" · "+(phaseMap[s.phase]||"")
+
+}
+
+function onStateChange(s){
+renderPanel(s)
+}
+
+</script>
+
+</body>
+</html>
+

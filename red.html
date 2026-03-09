@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Árbitro ROJO</title>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap');
+
+:root{
+--red:#e8001c;
+--blue:#0057e7;
+--gold:#ffd700;
+--bg:#080c10;
+--surface:#141b24;
+--border:#1e2d3d;
+--text:#e8edf2;
+--text-dim:#6a7c8e;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:linear-gradient(160deg,#180008,#0a0005,#080c10);
+font-family:'Rajdhani',sans-serif;
+color:white;
+height:100vh;
+display:flex;
+flex-direction:column;
+}
+
+/* HEADER */
+
+.panel-header{
+text-align:center;
+padding:25px;
+}
+
+.panel-title{
+font-family:'Bebas Neue';
+font-size:3rem;
+letter-spacing:.2em;
+color:var(--red);
+text-shadow:0 0 30px rgba(232,0,28,.5);
+}
+
+.panel-score-preview{
+font-family:'Bebas Neue';
+font-size:6rem;
+margin-top:10px;
+}
+
+.panel-score-label{
+font-size:.8rem;
+letter-spacing:.2em;
+color:var(--text-dim);
+}
+
+/* DIVIDER */
+
+.panel-divider{
+height:1px;
+margin:10px 20px;
+background:linear-gradient(to right,transparent,var(--red),transparent);
+}
+
+/* BOTONES */
+
+.score-buttons{
+flex:1;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+padding:20px;
+}
+
+.score-btn{
+font-family:'Bebas Neue';
+font-size:2rem;
+border:none;
+border-radius:10px;
+padding:30px 10px;
+display:flex;
+flex-direction:column;
+align-items:center;
+cursor:pointer;
+transition:.15s;
+}
+
+.score-btn:active{
+transform:scale(.95);
+}
+
+.score-btn.add{
+background:var(--red);
+}
+
+.score-btn.sub{
+background:#1c232c;
+}
+
+.score-btn.penalty{
+grid-column:span 2;
+background:var(--gold);
+color:black;
+}
+
+.btn-label{
+font-family:'Rajdhani';
+font-size:.7rem;
+letter-spacing:.15em;
+opacity:.7;
+}
+
+/* FOOTER */
+
+.panel-footer{
+text-align:center;
+padding:20px;
+}
+
+.panel-timer{
+font-family:'Bebas Neue';
+font-size:2.5rem;
+color:var(--text-dim);
+}
+
+.panel-round-info{
+font-size:.9rem;
+letter-spacing:.15em;
+color:var(--text-dim);
+margin-top:5px;
+}
+
+@media(max-width:760px){
+.panel-header{padding:16px}
+.panel-title{font-size:2.2rem}
+.panel-score-preview{font-size:4.3rem}
+.score-buttons{gap:10px;padding:12px}
+.score-btn{padding:20px 8px;font-size:1.7rem}
+.panel-timer{font-size:2rem}
+}
+
+</style>
+
+<script src="/static/script.js"></script>
+
+</head>
+
+<body>
+
+<div class="panel-header">
+<div class="panel-title">ROJO</div>
+<div class="panel-score-preview" id="redScorePreview">0</div>
+<div class="panel-score-label">PUNTOS</div>
+</div>
+
+<div class="panel-divider"></div>
+
+<div class="score-buttons">
+
+<button class="score-btn add" onclick="handleScore(1)">
++1
+<span class="btn-label">PUÑO</span>
+</button>
+
+<button class="score-btn add" onclick="handleScore(2)">
++2
+<span class="btn-label">PETO</span>
+</button>
+
+<button class="score-btn add" onclick="handleScore(3)">
++3
+<span class="btn-label">CABEZA</span>
+</button>
+
+<button class="score-btn add" onclick="handleScore(4)">
++4
+<span class="btn-label">GIRO PETO</span>
+</button>
+<button class="score-btn add" onclick="handleScore(6)">
++6
+<span class="btn-label">GIRO CABEZA</span>
+</button>
+
+<button class="score-btn sub" onclick="handleScore(-1)">
+−1
+<span class="btn-label">RESTAR</span>
+</button>
+
+<button class="score-btn penalty" onclick="handlePenaltyBtn()">
+⚑ PENALIZACIÓN
+<span class="btn-label">+1 AZUL</span>
+</button>
+
+</div>
+
+<div class="panel-footer">
+<div class="panel-timer" id="panelTimer">2:00</div>
+<div class="panel-round-info" id="panelRoundInfo">ASALTO 1 · LISTO</div>
+</div>
+
+<script>
+
+function handleScore(pts){
+addScore("red",pts)
+}
+
+function handlePenaltyBtn(){
+addPenalty("red")
+}
+
+function renderPanel(s){
+
+document.getElementById("redScorePreview").textContent=s.redScore
+document.getElementById("panelTimer").textContent=formatTime(s.timeLeft)
+document.getElementById("panelRoundInfo").textContent="ASALTO "+s.currentRound+" · "+(s.phase||"LISTO").toUpperCase()
+
+}
+
+function onStateChange(s){
+renderPanel(s)
+}
+
+</script>
+
+</body>
+</html>

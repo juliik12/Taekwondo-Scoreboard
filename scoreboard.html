@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marcador WT</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+.name-input{
+  background:transparent;
+  border:1px dashed rgba(255,255,255,0.35);
+  border-radius:8px;
+  text-align:center;
+  width:min(95%, 360px);
+  color:#fff;
+  padding:4px 8px;
+  text-transform:uppercase;
+}
+.name-input:focus{
+  outline:none;
+  border-color:#ffd700;
+  box-shadow:0 0 0 2px rgba(255,215,0,0.25);
+}
+</style>
+</head>
+<body class="scoreboard-wrapper">
+
+<header class="sb-header">
+  <div class="sb-logo">WORLD <span>TAEKWONDO</span> · <span id="roomName">RING</span></div>
+</header>
+
+<section class="rounds-bar">
+  <div class="round-label" id="phaseLabel">LISTO</div>
+  <div class="round-pips">
+    <div class="pip red-pip" id="redRound1"></div>
+    <div class="pip red-pip" id="redRound2"></div>
+    <div class="pip red-pip" id="redRound3"></div>
+  </div>
+  <div class="round-label" id="roundLabel">ASALTO 1</div>
+  <div class="round-pips">
+    <div class="pip blue-pip" id="blueRound1"></div>
+    <div class="pip blue-pip" id="blueRound2"></div>
+    <div class="pip blue-pip" id="blueRound3"></div>
+  </div>
+</section>
+
+<main class="sb-main">
+  <section class="competitor red">
+    <input class="competitor-name name-input" id="redNameInput" value="ROJA" maxlength="24">
+    <div class="score-display" id="redScore">0</div>
+    <div class="penalty-display">GAM-JEOM <span id="redPenalties">0</span></div>
+  </section>
+
+  <section class="center-col">
+    <div class="round-badge" id="centerRound">ASALTO 1</div>
+    <div class="timer-display" id="timer">2:00</div>
+    <div class="divider-line"></div>
+    <div class="round-label" id="matchState">LISTO</div>
+  </section>
+
+  <section class="competitor blue">
+    <input class="competitor-name name-input" id="blueNameInput" value="AZUL" maxlength="24">
+    <div class="score-display" id="blueScore">0</div>
+    <div class="penalty-display">GAM-JEOM <span id="bluePenalties">0</span></div>
+  </section>
+</main>
+
+<section class="sb-controls">
+  <button class="btn btn-start" onclick="startTimer()">Iniciar</button>
+  <button class="btn btn-pause" onclick="pauseTimer()">Pausar</button>
+  <button class="btn btn-reset" onclick="resetMatch()">Reiniciar</button>
+  <button class="btn btn-pause" onclick="advanceRound()">Siguiente Asalto</button>
+  <button class="btn btn-reset" id="restConfigBtn" style="display:none;" onclick="editRest()">Descanso</button>
+  <a class="btn btn-pause" id="pdfReportBtn" href="#" style="text-decoration:none;display:inline-flex;align-items:center;">Reporte PDF</a>
+</section>
+
+<section class="history-box">
+  <div class="history-title">HISTORIAL</div>
+  <ul class="history-list" id="historyList"></ul>
+</section>
+
+<section class="history-box" style="display:flex;align-items:center;gap:12px;">
+  <img id="spectatorQr" alt="QR Espectador" style="width:96px;height:96px;background:#fff;padding:4px;border-radius:8px;">
+  <div>
+    <div class="history-title" style="margin:0;">QR ESPECTADOR</div>
+    <div id="spectatorUrl" style="color:#ffffff;word-break:break-all;"></div>
+  </div>
+</section>
+
+<script>
+window.SCOREBOARD_READ_ONLY = false;
+</script>
+<script src="/static/script.js"></script>
+<script>
+const phaseMap = {
+  idle: 'LISTO',
+  running: 'COMBATE',
+  rest: 'DESCANSO',
+  paused: 'PAUSADO',
+  round_end: 'FIN DEL ROUND',
+  match_end: 'FIN DEL COMBATE'
+};
+
+let editingRedName = false;
+let editingBlueName = false;
+
+function setRounds(redWon, blueWon) {
+  document.getElementById('redRound1').classList.toggle('filled', redWon >= 1);
+  document.getElementById('redRound2').classList.toggle('filled', redWon >= 2);
+  document.getElementById('redRound3').classList.toggle('filled', redWon >= 3);
+  document.getElementById('blueRound1').classList.toggle('filled', blueWon >= 1);
+  document.getElementById('blueRound2').classList.toggle('filled', blueWon >= 2);
+  document.getElementById('blueRound3').classList.toggle('filled', blueWon >= 3);
+}
+
+function render(s) {
+  document.getElementById('roomName').textContent = (s.roomName || '').toUpperCase();
+  if (!editingRedName) {
+    document.getElementById('redNameInput').value = (s.redName || 'ESQUINA ROJA').toUpperCase();
+  }
+  if (!editingBlueName) {
+    document.getElementById('blueNameInput').value = (s.blueName || 'ESQUINA AZUL').toUpperCase();
+  }
+
+  document.getElementById('redScore').textContent = s.redScore;
+  document.getElementById('blueScore').textContent = s.blueScore;
+  document.getElementById('redPenalties').textContent = s.redPenalties;
+  document.getElementById('bluePenalties').textContent = s.bluePenalties;
+
+  const timer = document.getElementById('timer');
+  timer.textContent = formatTime(s.timeLeft);
+  timer.classList.toggle('urgent', s.timeLeft <= 10);
+
+  const roundText = 'ASALTO ' + s.currentRound;
+  document.getElementById('roundLabel').textContent = roundText;
+  document.getElementById('centerRound').textContent = roundText;
+
+  const phaseText = phaseMap[s.phase] || 'LISTO';
+  document.getElementById('phaseLabel').textContent = phaseText;
+  document.getElementById('matchState').textContent = phaseText;
+
+  setRounds(s.redRoundsWon, s.blueRoundsWon);
+
+  const historyList = document.getElementById('historyList');
+  const history = Array.isArray(s.history) ? s.history.slice(-12).reverse() : [];
+  historyList.innerHTML = history.map((item) => `<li>[${item.ts}] ${item.text}</li>`).join('');
+
+  const room = encodeURIComponent(s.roomName || '');
+  const spectatorPath = '/spectator/' + room;
+  const fullUrl = window.location.origin + spectatorPath;
+  document.getElementById('spectatorUrl').textContent = fullUrl;
+  document.getElementById('spectatorQr').src =
+    'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(fullUrl);
+  document.getElementById('pdfReportBtn').href = '/report/' + room + '.pdf';
+}
+
+function onStateChange(s) {
+  render(s);
+}
+
+function saveNamesFromInputs() {
+  const redInput = document.getElementById('redNameInput');
+  const blueInput = document.getElementById('blueNameInput');
+
+  const red = redInput.value.trim();
+  const blue = blueInput.value.trim();
+  const redFallback = (state?.redName || 'ESQUINA ROJA');
+  const blueFallback = (state?.blueName || 'ESQUINA AZUL');
+
+  setCompetitorNames(red || redFallback, blue || blueFallback);
+}
+
+function initNameInputs() {
+  const redInput = document.getElementById('redNameInput');
+  const blueInput = document.getElementById('blueNameInput');
+
+  redInput.addEventListener('focus', () => { editingRedName = true; });
+  blueInput.addEventListener('focus', () => { editingBlueName = true; });
+
+  redInput.addEventListener('blur', () => {
+    editingRedName = false;
+    saveNamesFromInputs();
+  });
+  blueInput.addEventListener('blur', () => {
+    editingBlueName = false;
+    saveNamesFromInputs();
+  });
+
+  [redInput, blueInput].forEach((input) => {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        input.blur();
+      }
+    });
+  });
+}
+
+async function initRoleUI() {
+  try {
+    const res = await fetch('/me');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data?.user?.role === 'admin') {
+      document.getElementById('restConfigBtn').style.display = 'inline-block';
+    }
+  } catch (_err) {}
+}
+
+function editRest() {
+  const current = Number.isFinite(state?.restDuration) ? state.restDuration : 30;
+  const input = prompt('Descanso en segundos (10 a 180):', String(current || 30));
+  if (!input) return;
+  const seconds = Number(input);
+  if (!Number.isFinite(seconds)) return;
+  setRestDuration(Math.round(seconds));
+}
+
+initRoleUI();
+initNameInputs();
+</script>
+
+</body>
+</html>

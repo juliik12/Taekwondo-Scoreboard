@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Centro de Torneo WT</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap');
+:root{--bg:#090d12;--panel:#121a24;--panel2:#0d141d;--border:#1d2b3b;--text:#e8edf2;--dim:#7a8da1;--gold:#ffd700;--red:#e8001c;--blue:#0057e7;--ok:#25c06d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Rajdhani',sans-serif;background:radial-gradient(circle at 20% 0%,#101c2b,#090d12);color:var(--text);min-height:100vh;padding:22px}
+.container{max-width:1280px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.title{font-family:'Bebas Neue',sans-serif;letter-spacing:.18em;font-size:2.4rem}
+.title span{color:var(--gold)}
+.user{color:var(--dim);font-weight:700}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+button{border:none;cursor:pointer;padding:10px 16px;border-radius:6px;font-weight:700;font-family:'Rajdhani',sans-serif}
+.create{background:var(--gold);color:#000}
+.logout{background:#1b2532;color:var(--text);border:1px solid var(--border)}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px}
+.panel h2{font-family:'Bebas Neue',sans-serif;letter-spacing:.12em;margin-bottom:10px;color:#fff}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(140px,1fr));gap:10px}
+.stat{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px}
+.stat-label{color:var(--dim);font-weight:700;font-size:.85rem;text-transform:uppercase}
+.stat-value{font-family:'Bebas Neue',sans-serif;font-size:2.1rem;letter-spacing:.08em}
+.rooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px}
+.room{background:var(--panel2);border:1px solid var(--border);padding:12px;border-radius:10px}
+.room-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.room h3{font-family:'Bebas Neue',sans-serif;letter-spacing:.12em;font-size:1.5rem}
+.badge{padding:4px 8px;border-radius:999px;font-size:.75rem;font-weight:800;text-transform:uppercase}
+.b-active{background:rgba(37,192,109,.15);border:1px solid rgba(37,192,109,.4);color:#82f2b6}
+.b-wait{background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.35);color:#ffe381}
+.b-end{background:rgba(106,124,142,.15);border:1px solid rgba(106,124,142,.35);color:#c6d4e0}
+.names{font-size:.95rem;color:var(--dim);margin-bottom:10px}
+.links{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+.links a,.links button{font-size:.82rem;text-decoration:none;padding:8px 10px;border-radius:6px;font-weight:800}
+.score{background:var(--gold);color:#000}
+.red{background:var(--red);color:#fff}
+.blue{background:var(--blue);color:#fff}
+.watch{background:#0f2238;color:#b8d7ff;border:1px solid #204064}
+.tv{background:#1b2d13;color:#b8f7aa;border:1px solid #345c23}
+.delete{background:#2a0b0f;color:#ff9a9a;border:1px solid #5b1b23}
+.qr-wrap{display:flex;align-items:center;gap:10px;padding-top:8px;border-top:1px solid var(--border)}
+.qr-wrap img{width:64px;height:64px;border-radius:6px;background:#fff;padding:4px}
+.qr-wrap small{color:var(--dim)}
+.history-list{list-style:none;max-height:540px;overflow:auto;border-top:1px solid var(--border);margin-top:10px;padding-top:8px}
+.history-list li{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.history-list b{color:var(--gold)}
+.note{margin-top:10px;color:var(--dim)}
+@media(max-width:1080px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(140px,1fr))}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="top">
+    <div>
+      <div class="title">WT <span>CENTRO DE TORNEO</span></div>
+      <div class="user" id="userInfo">Cargando usuario...</div>
+    </div>
+    <div class="actions">
+      <button class="create" id="createBtn" onclick="createRoom()">Crear Combate</button>
+      <a id="registerBtn" href="/register" style="display:none;background:#2a2140;border:1px solid #4f3b7a;color:#d5c8ff;padding:10px 14px;border-radius:6px;font-weight:700;text-decoration:none;">Registrar Usuario</a>
+      <a href="/tournament" style="background:#16253a;border:1px solid #2c4769;color:#b9d9ff;padding:10px 14px;border-radius:6px;font-weight:700;text-decoration:none;">Llaves</a>
+      <button class="logout" onclick="logout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>Panel de Rings</h2>
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Combates activos</div><div class="stat-value" id="stActive">0</div></div>
+        <div class="stat"><div class="stat-label">Rings esperando</div><div class="stat-value" id="stWait">0</div></div>
+        <div class="stat"><div class="stat-label">Rings terminados</div><div class="stat-value" id="stFinish">0</div></div>
+        <div class="stat"><div class="stat-label">Total combates</div><div class="stat-value" id="stTotal">0</div></div>
+        <div class="stat"><div class="stat-label">Promedio puntos</div><div class="stat-value" id="stAvg">0</div></div>
+        <div class="stat"><div class="stat-label">Penalizaciones</div><div class="stat-value" id="stPen">0</div></div>
+        <div class="stat"><div class="stat-label">Espectadores en vivo</div><div class="stat-value" id="stSpecs">0</div></div>
+      </div>
+
+      <div class="rooms" id="rooms"></div>
+      <div class="note" id="note"></div>
+    </section>
+
+    <aside class="panel">
+      <h2>Historial de Combates</h2>
+      <ul class="history-list" id="history"></ul>
+    </aside>
+  </div>
+</div>
+
+<script>
+let role = 'spectator';
+
+function roleLabel(value){
+  if(value === 'admin') return 'Administrador';
+  if(value === 'professor') return 'Profesor';
+  return 'Espectador';
+}
+
+function statusBadge(status){
+  if(status === 'combate activo') return '<span class="badge b-active">Activo</span>';
+  if(status === 'terminado') return '<span class="badge b-end">Terminado</span>';
+  return '<span class="badge b-wait">Esperando</span>';
+}
+
+async function fetchMe(){
+  const res = await fetch('/me');
+  if(!res.ok){
+    window.location.href = '/login';
+    return;
+  }
+  const data = await res.json();
+  role = data.user.role;
+  document.getElementById('userInfo').textContent = `Usuario: ${data.user.username} (${roleLabel(role)})`;
+  document.getElementById('createBtn').style.display = (role === 'admin' || role === 'professor') ? 'inline-block' : 'none';
+  document.getElementById('registerBtn').style.display = role === 'admin' ? 'inline-block' : 'none';
+}
+
+function roomLinks(room){
+  const encoded = encodeURIComponent(room.room);
+  const roomSafe = room.room.replace(/'/g, "\\'");
+
+  if(role === 'admin' || role === 'professor'){
+    return `
+      <a class="score" href="/score/${encoded}">Marcador</a>
+      <a class="red" href="/red/${encoded}">Panel Rojo</a>
+      <a class="blue" href="/blue/${encoded}">Panel Azul</a>
+      <a class="watch" href="/spectator/${encoded}">Espectador</a>
+      <a class="tv" href="/tv/${encoded}">TV Pública</a>
+      <a class="watch" href="/report/${encoded}.pdf">Reporte PDF</a>
+      ${role === 'admin' ? `<button class="delete" onclick="deleteRoom('${roomSafe}')">Borrar Sala</button>` : ''}
+    `;
+  }
+
+  return `
+    <a class="watch" href="/spectator/${encoded}">Espectador</a>
+    <a class="tv" href="/tv/${encoded}">TV Pública</a>
+  `;
+}
+
+function qrUrl(path){
+  const full = window.location.origin + path;
+  return `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(full)}`;
+}
+
+async function loadRooms(){
+  const res = await fetch('/rooms');
+  if(!res.ok) return;
+
+  const rooms = await res.json();
+  const container = document.getElementById('rooms');
+
+  container.innerHTML = '';
+  rooms.forEach((room)=>{
+    const encoded = encodeURIComponent(room.room);
+    const spectatorPath = `/spectator/${encoded}`;
+    container.innerHTML += `
+      <div class="room">
+        <div class="room-head">
+          <h3>${room.room}</h3>
+          ${statusBadge(room.status)}
+        </div>
+        <div class="names">Rojo: ${room.redName} · Azul: ${room.blueName}</div>
+        <div class="names">Espectadores: ${room.spectatorCount || 0}${role === 'admin' && room.spectatorUsers && room.spectatorUsers.length ? ` · ${room.spectatorUsers.join(', ')}` : ''}</div>
+        <div class="links">${roomLinks(room)}</div>
+        <div class="qr-wrap">
+          <img src="${qrUrl(spectatorPath)}" alt="QR ${room.room}">
+          <small>Escanear para entrar al espectador de ${room.room}.</small>
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('note').textContent = rooms.length ? '' : 'No hay rings creados todavía.';
+}
+
+async function loadDashboard(){
+  const res = await fetch('/dashboard');
+  if(!res.ok) return;
+  const d = await res.json();
+
+  document.getElementById('stActive').textContent = d.activeRings;
+  document.getElementById('stWait').textContent = d.waitingRings;
+  document.getElementById('stFinish').textContent = d.finishedRings;
+  document.getElementById('stTotal').textContent = d.totalMatches;
+  document.getElementById('stAvg').textContent = d.avgPoints;
+  document.getElementById('stPen').textContent = d.penalties;
+  document.getElementById('stSpecs').textContent = d.totalSpectators || 0;
+}
+
+async function loadHistory(){
+  const res = await fetch('/match_history');
+  if(!res.ok) return;
+  const history = await res.json();
+  const el = document.getElementById('history');
+
+  el.innerHTML = history.slice(0, 40).map((item)=>
+    `<li><b>${item.room}</b> · ${item.redName} ${item.redScore} - ${item.blueScore} ${item.blueName}<br>${item.date} · Ganador: ${item.winner} · Asaltos ${item.redRoundsWon}-${item.blueRoundsWon}</li>`
+  ).join('');
+
+  if(!el.innerHTML) el.innerHTML = '<li>Sin combates finalizados todavía.</li>';
+}
+
+async function createRoom(){
+  const res = await fetch('/create_room',{method:'POST'});
+  if(!res.ok) return;
+  await refreshAll();
+}
+
+async function deleteRoom(room){
+  if(!confirm(`Borrar ${room}?`)) return;
+  await fetch('/delete_room/' + encodeURIComponent(room),{method:'POST'});
+  await refreshAll();
+}
+
+async function logout(){
+  await fetch('/logout',{method:'POST'});
+  window.location.href = '/login';
+}
+
+async function refreshAll(){
+  await Promise.all([loadDashboard(), loadRooms(), loadHistory()]);
+}
+
+(async function init(){
+  await fetchMe();
+  await refreshAll();
+  setInterval(refreshAll, 2500);
+})();
+</script>
+</body>
+</html>
+

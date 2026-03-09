@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inicio de Sesion WT</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap');
+:root{--bg:#090d12;--panel:#121a24;--border:#1d2b3b;--text:#e8edf2;--dim:#7a8da1;--gold:#ffd700}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Rajdhani',sans-serif;background:radial-gradient(circle at 20% 0%,#101c2b,#090d12);color:var(--text);display:grid;place-items:center;min-height:100vh;padding:16px}
+.card{width:min(420px,100%);background:var(--panel);border:1px solid var(--border);padding:24px;border-radius:12px}
+h1{font-family:'Bebas Neue',sans-serif;letter-spacing:.18em;font-size:2.2rem;margin-bottom:10px}
+h1 span{color:var(--gold)}
+p{color:var(--dim);margin-bottom:16px}
+label{display:block;margin:12px 0 6px;color:var(--dim);font-weight:700}
+input{width:100%;padding:11px;border:1px solid var(--border);border-radius:8px;background:#0c131c;color:var(--text)}
+button{margin-top:16px;width:100%;padding:12px;border:none;border-radius:8px;background:var(--gold);color:#000;font-weight:800;cursor:pointer}
+.msg{margin-top:12px;color:#ff9e9e;min-height:20px}
+.hint{margin-top:14px;color:var(--dim);font-size:.9rem}
+.links{margin-top:12px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.links a{color:#b8d7ff;text-decoration:none;font-weight:700}
+@media(max-width:560px){.card{padding:16px}h1{font-size:1.8rem}}
+</style>
+</head>
+<body>
+  <form class="card" onsubmit="doLogin(event)">
+    <h1>WT <span>INICIO DE SESION</span></h1>
+    <p>Ingresá con usuario Administrador, Profesor o Espectador registrado.</p>
+
+    <label>Usuario</label>
+    <input id="username" required>
+
+    <label>Contraseña</label>
+    <input id="password" type="password" required>
+
+    <button type="submit">Entrar</button>
+    <div class="msg" id="msg"></div>
+    <div class="hint">Si no tenés cuenta de espectador, podés registrarte abajo.</div>
+    <div class="links">
+      <a href="/register_spectator">Registrarme como espectador</a>
+    </div>
+  </form>
+
+<script>
+async function doLogin(e){
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  const res = await fetch('/login',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({username,password})
+  });
+
+  if(!res.ok){
+    document.getElementById('msg').textContent = 'Credenciales inválidas.';
+    return;
+  }
+
+  window.location.href = '/';
+}
+</script>
+</body>
+</html>

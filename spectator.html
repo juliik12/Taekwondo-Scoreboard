@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espectador del Ring</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+body{padding:14px;background:#0a111a;color:#fff;font-family:'Rajdhani',sans-serif}
+.wrap{max-width:980px;margin:0 auto;background:#101925;border:1px solid #223447;border-radius:14px;overflow:hidden}
+.head{padding:14px 16px;border-bottom:1px solid #223447;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.ring{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.12em}
+.stage{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.14em;color:#ffd700}
+.fighters{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;padding:16px}
+.side{display:flex;flex-direction:column;gap:6px}
+.side.right{text-align:right;align-items:flex-end}
+.name{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.1em}
+.score{font-family:'Bebas Neue',sans-serif;font-size:5.5rem;line-height:1;padding:6px 16px;border-radius:12px;border:2px solid rgba(255,255,255,.2);display:inline-block;min-width:2ch;width:fit-content}
+.side.red .score{background:#e8001c}
+.side.blue .score{background:#0057e7}
+.pts{color:#cfdae5;letter-spacing:.08em}
+.center{text-align:center}
+.timer{font-family:'Bebas Neue',sans-serif;font-size:3.4rem;background:#ffd700;color:#000;border:2px solid #000;border-radius:10px;padding:4px 14px;display:inline-block}
+.round{margin-top:10px;font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.1em}
+.phase{font-size:.95rem;color:#c4d2df;text-transform:uppercase;letter-spacing:.12em}
+.block{margin:0 16px 14px;background:#121e2b;border:1px solid #223447;border-radius:10px;padding:12px}
+.block h3{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.12em;margin-bottom:8px}
+.table{display:grid;grid-template-columns:1fr 72px 20px 72px;row-gap:6px;column-gap:8px;align-items:center}
+.table .label{color:#c7d5e2}
+.table .val{text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1.5rem}
+.table .sep{text-align:center;color:#7f95ab}
+.prob-row{display:grid;grid-template-columns:72px 1fr 54px;gap:8px;align-items:center;margin:8px 0}
+.track{height:16px;background:#1d2a38;border-radius:999px;overflow:hidden}
+.fill{height:100%}
+.fill.red{background:#e8001c}
+.fill.blue{background:#0057e7}
+.history{list-style:none;max-height:160px;overflow:auto}
+.history li{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+@media(max-width:760px){
+  .fighters{grid-template-columns:1fr;gap:14px}
+  .center{order:-1}
+  .side,.side.right{align-items:flex-start;text-align:left}
+  .score{font-size:4.2rem}
+  .table{grid-template-columns:1fr 56px 16px 56px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <div class="ring" id="ringLabel">RING 1</div>
+    <div class="stage" id="stageLabel">SEMIFINAL</div>
+  </header>
+
+  <section class="fighters">
+    <div class="side red">
+      <div class="name" id="redName">JUAN</div>
+      <div class="score" id="redScore">0</div>
+      <div class="pts">PUNTOS · Gam-jeom <span id="redPenalties">0</span></div>
+    </div>
+
+    <div class="center">
+      <div class="timer" id="timer">2:00</div>
+      <div class="round" id="roundLabel">ASALTO 1</div>
+      <div class="phase" id="phaseLabel">LISTO</div>
+    </div>
+
+    <div class="side blue right">
+      <div class="name" id="blueName">PEDRO</div>
+      <div class="score" id="blueScore">0</div>
+      <div class="pts">PUNTOS · Gam-jeom <span id="bluePenalties">0</span></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>ESTADÍSTICAS DEL COMBATE</h3>
+    <div class="table">
+      <div class="label">Patadas al peto</div><div class="val" id="bodyRed">0</div><div class="sep">|</div><div class="val" id="bodyBlue">0</div>
+      <div class="label">Patadas a la cabeza</div><div class="val" id="headRed">0</div><div class="sep">|</div><div class="val" id="headBlue">0</div>
+      <div class="label">Patadas con giro</div><div class="val" id="turnRed">0</div><div class="sep">|</div><div class="val" id="turnBlue">0</div>
+      <div class="label">Penalizaciones</div><div class="val" id="penRed">0</div><div class="sep">|</div><div class="val" id="penBlue">0</div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>PROBABILIDAD DE VICTORIA</h3>
+    <div class="prob-row"><span>ROJO</span><div class="track"><div class="fill red" id="probRedBar"></div></div><span id="probRedTxt">50%</span></div>
+    <div class="prob-row"><span>AZUL</span><div class="track"><div class="fill blue" id="probBlueBar"></div></div><span id="probBlueTxt">50%</span></div>
+  </section>
+
+  <section class="block">
+    <h3>ACCIONES EN VIVO</h3>
+    <ul class="history" id="historyList"></ul>
+  </section>
+</div>
+
+<script>
+window.SCOREBOARD_READ_ONLY = true;
+</script>
+<script src="/static/script.js"></script>
+<script>
+const phaseMap = {
+  idle: 'LISTO',
+  running: 'COMBATE',
+  paused: 'PAUSADO',
+  rest: 'DESCANSO',
+  round_end: 'FIN DEL ROUND',
+  match_end: 'FIN DEL COMBATE'
+};
+
+function clamp(v){ return Math.max(0, Math.min(100, Math.round(v))); }
+
+function extractKickStats(history){
+  const out = { bodyRed:0, bodyBlue:0, headRed:0, headBlue:0, turnRed:0, turnBlue:0 };
+
+  history.forEach((item)=>{
+    const text = (item && item.text) ? String(item.text) : '';
+    const m = text.match(/^(ROJO|AZUL) \+([1-4])/);
+    if(!m) return;
+
+    const side = m[1];
+    const pts = Number(m[2]);
+
+    if(pts === 1){
+      if(side === 'ROJO') out.bodyRed++; else out.bodyBlue++;
+    }
+    if(pts === 3 || pts === 4){
+      if(side === 'ROJO') out.headRed++; else out.headBlue++;
+    }
+    if(pts === 2 || pts === 4){
+      if(side === 'ROJO') out.turnRed++; else out.turnBlue++;
+    }
+  });
+
+  return out;
+}
+
+function winProbability(s){
+  const scoreDiff = s.redScore - s.blueScore;
+  const penDiff = s.bluePenalties - s.redPenalties;
+  const roundDiff = s.redRoundsWon - s.blueRoundsWon;
+  const timeFactor = (120 - s.timeLeft) / 120;
+  const signal = (scoreDiff * 0.9) + (penDiff * 0.5) + (roundDiff * 1.4) + (timeFactor * scoreDiff * 0.4);
+  const red = 1 / (1 + Math.exp(-signal / 2.8));
+  const redPct = clamp(red * 100);
+  return { red: redPct, blue: 100 - redPct };
+}
+
+function setProb(idBar, idTxt, value){
+  const p = clamp(value);
+  document.getElementById(idBar).style.width = p + '%';
+  document.getElementById(idTxt).textContent = p + '%';
+}
+
+function onStateChange(s){
+  document.getElementById('ringLabel').textContent = (s.roomName || 'RING').toUpperCase();
+  document.getElementById('stageLabel').textContent = (s.matchStage || 'SEMIFINAL').toUpperCase();
+
+  document.getElementById('redName').textContent = (s.redName || 'ROJO').toUpperCase();
+  document.getElementById('blueName').textContent = (s.blueName || 'AZUL').toUpperCase();
+  document.getElementById('redScore').textContent = s.redScore;
+  document.getElementById('blueScore').textContent = s.blueScore;
+  document.getElementById('redPenalties').textContent = s.redPenalties;
+  document.getElementById('bluePenalties').textContent = s.bluePenalties;
+
+  document.getElementById('timer').textContent = formatTime(s.timeLeft);
+  document.getElementById('roundLabel').textContent = 'ASALTO ' + s.currentRound;
+  document.getElementById('phaseLabel').textContent = phaseMap[s.phase] || 'LISTO';
+
+  const history = Array.isArray(s.history) ? s.history : [];
+  const ks = extractKickStats(history);
+  document.getElementById('bodyRed').textContent = ks.bodyRed;
+  document.getElementById('bodyBlue').textContent = ks.bodyBlue;
+  document.getElementById('headRed').textContent = ks.headRed;
+  document.getElementById('headBlue').textContent = ks.headBlue;
+  document.getElementById('turnRed').textContent = ks.turnRed;
+  document.getElementById('turnBlue').textContent = ks.turnBlue;
+  document.getElementById('penRed').textContent = s.redPenalties;
+  document.getElementById('penBlue').textContent = s.bluePenalties;
+
+  const prob = winProbability(s);
+  setProb('probRedBar', 'probRedTxt', prob.red);
+  setProb('probBlueBar', 'probBlueTxt', prob.blue);
+
+  document.getElementById('historyList').innerHTML = history.slice(-12).reverse().map((h)=>`<li>[${h.ts}] ${h.text}</li>`).join('') || '<li>Sin acciones registradas.</li>';
+}
+</script>
+</body>
+</html>
+
