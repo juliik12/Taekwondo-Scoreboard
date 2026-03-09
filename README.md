@@ -144,5 +144,5 @@ Archivo ejemplo incluido:
 
 ## Licencia
 
-Definí tu licencia aquí (por ejemplo MIT).
+MIT
 
