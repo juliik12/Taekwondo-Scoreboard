@@ -9,7 +9,7 @@
     "featured": false,
     "default_locale": "es",
     "main_image": {
-      "reference": "static/portfolio-cover.png"
+      "reference": "portfolio-cover.png"
     },
     "gallery": [],
     "technologies": [
