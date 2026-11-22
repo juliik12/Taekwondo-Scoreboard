@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "portfolio": {
+    "id": "taekwondo-wt-scoreboard",
+    "visible": true,
+    "category": "sports-technology",
+    "status": "in_progress",
+    "created_at": "2026-09-03",
+    "featured": false,
+    "default_locale": "es",
+    "main_image": {
+      "reference": "static/portfolio-cover.png"
+    },
+    "gallery": [],
+    "technologies": [
+      "python",
+      "flask",
+      "sqlite",
+      "javascript"
+    ],
+    "github_url": "https://github.com/juliik12/Taekwondo-Scoreboard",
+    "case_study": {
+      "translations": {
+        "es": {
+          "overview": "Sistema web para administrar y mostrar combates de Taekwondo WT.",
+          "challenge": "Reunir el control del combate, las vistas de arbitraje y la consulta del público en una herramienta organizada por rings.",
+          "approach": "Implementación con Flask, SQLite y una interfaz web en HTML, CSS y JavaScript. Separa los roles de administración, profesor y espectador, y ofrece vistas específicas para árbitros, público y pantalla de TV.",
+          "outcome": "El repositorio documenta marcador en vivo, historial de combates y generación de reportes PDF por ring."
+        },
+        "en": {
+          "overview": "A web system for managing and displaying WT Taekwondo matches.",
+          "challenge": "Bring match control, referee views, and audience access together in a tool organized around rings.",
+          "approach": "Built with Flask, SQLite, and a web interface using HTML, CSS, and JavaScript. It separates administrator, professor, and spectator roles and provides dedicated referee, audience, and TV views.",
+          "outcome": "The repository documents live scoring, match history, and PDF reports for each ring."
+        }
+      }
+    }
+  },
+  "translations": {
+    "es": {
+      "title": "Taekwondo WT Scoreboard",
+      "description": "Sistema web de marcación para combates WT con rings, control en vivo, vistas para árbitros y espectadores, pantalla de TV, historial y reportes PDF."
+    },
+    "en": {
+      "title": "Taekwondo WT Scoreboard",
+      "description": "Web scoring system for WT matches with ring management, live controls, referee and spectator views, a TV display, match history, and PDF reports."
+    }
+  }
+}
